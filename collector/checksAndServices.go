@@ -1,4 +1,4 @@
-package main
+package collector
 
 import (
 	"fmt"
@@ -9,7 +9,11 @@ import (
 	"github.com/prometheus/common/log"
 )
 
-func newAgentChecksAndServicesCollector(client *api.Client) agentChecksAndServicesCollector {
+func init() {
+	factories["checksAndServices"] = newAgentChecksAndServicesCollector
+}
+
+func newAgentChecksAndServicesCollector(client *api.Client) Collector {
 	const subsystem = "checks"
 	return agentChecksAndServicesCollector{
 		ConsulClient: client,
@@ -55,16 +59,16 @@ func (c agentChecksAndServicesCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- c.ServiceChecksFailing
 }
 
-func (c agentChecksAndServicesCollector) Collect(ch chan<- prometheus.Metric) {
+func (c agentChecksAndServicesCollector) Collect(ch chan<- prometheus.Metric) error {
 	checks, err := c.ConsulClient.Agent().Checks()
 	if err != nil {
 		log.Errorf("Could not fetch checks from Consul: %v", err)
-		return
+		return err
 	}
 	services, err := c.ConsulClient.Agent().Services()
 	if err != nil {
 		log.Errorf("Could not fetch checks from Consul: %v", err)
-		return
+		return err
 	}
 
 	serviceById := make(map[string]*api.AgentService)
@@ -102,6 +106,8 @@ func (c agentChecksAndServicesCollector) Collect(ch chan<- prometheus.Metric) {
 		}
 		ch <- prometheus.MustNewConstMetric(c.ServiceChecksFailing, prometheus.GaugeValue, failing, service.Service, createTagsString(service.Tags))
 	}
+
+	return nil
 }
 
 func isPassingFloat(status string) float64 {

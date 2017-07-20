@@ -1,4 +1,4 @@
-package main
+package collector
 
 import (
 	"strings"
@@ -10,11 +10,11 @@ import (
 	"github.com/prometheus/common/log"
 )
 
-const (
-	agentSelfStatsKey = "Stats"
-)
+func init() {
+	factories["stats"] = newAgentStatsCollector
+}
 
-func newAgentStatsCollector(client *api.Client) agentStatsCollector {
+func newAgentStatsCollector(client *api.Client) Collector {
 	const subsystem = "stats"
 	return agentStatsCollector{
 		ConsulClient: client,
@@ -288,11 +288,11 @@ func (c agentStatsCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- c.ConsulSerfLastQueryClock
 }
 
-func (c agentStatsCollector) Collect(ch chan<- prometheus.Metric) {
+func (c agentStatsCollector) Collect(ch chan<- prometheus.Metric) error {
 	info, err := c.ConsulClient.Agent().Self()
 	if err != nil {
 		log.Errorf("Could not fetch stats from Consul: %v", err)
-		return
+		return err
 	}
 
 	var s Stats
@@ -303,12 +303,12 @@ func (c agentStatsCollector) Collect(ch chan<- prometheus.Metric) {
 	decoder, err := mapstructure.NewDecoder(config)
 	if err != nil {
 		log.Errorf("Could not create decoder: %v", err)
-		return
+		return err
 	}
-	err = decoder.Decode(info[agentSelfStatsKey])
+	err = decoder.Decode(info["stats"])
 	if err != nil {
 		log.Errorf("Could not decode stats from Consul: %v", err)
-		return
+		return err
 	}
 
 	ch <- prometheus.MustNewConstMetric(c.ConsulAgentCheckMonitors, prometheus.GaugeValue, float64(s.Agent.CheckMonitors))
@@ -371,4 +371,13 @@ func (c agentStatsCollector) Collect(ch chan<- prometheus.Metric) {
 	} else {
 		ch <- prometheus.MustNewConstMetric(c.ConsulKnownServers, prometheus.GaugeValue, float64(s.Consul.KnownServers))
 	}
+
+	return nil
+}
+
+func boolToFloat64(b bool) float64 {
+	if b {
+		return 1
+	}
+	return 0
 }

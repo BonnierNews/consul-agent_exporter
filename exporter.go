@@ -6,15 +6,13 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/BonnierNews/consul-agent_exporter/collector"
+
 	"github.com/hashicorp/consul/api"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/common/log"
 	"github.com/prometheus/common/version"
-)
-
-const (
-	namespace = "consul"
 )
 
 func main() {
@@ -40,11 +38,8 @@ func main() {
 		log.Fatalf("Error configuring Consul client: %v", err)
 	}
 
-	statsCollector := newAgentStatsCollector(consulClient)
-	checksAndServicesCollector := newAgentChecksAndServicesCollector(consulClient)
-	prometheus.MustRegister(statsCollector)
-	prometheus.MustRegister(checksAndServicesCollector)
-	// TODO: Replace with single collector which takes an "agent snapshot" and passes into subcollectors
+	collector := collector.NewConsulCollector(consulClient)
+	prometheus.MustRegister(collector)
 
 	http.Handle("/metrics", promhttp.Handler())
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
@@ -59,11 +54,4 @@ func main() {
 
 	log.Infoln("Starting server on", *listenAddress)
 	log.Fatalf("Cannot start Consul agent exporter: %s", http.ListenAndServe(*listenAddress, nil))
-}
-
-func boolToFloat64(b bool) float64 {
-	if b {
-		return 1
-	}
-	return 0
 }
