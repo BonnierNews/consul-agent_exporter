@@ -40,8 +40,11 @@ func main() {
 		log.Fatalf("Error configuring Consul client: %v", err)
 	}
 
-	collector := newAgentStatsCollector(consulClient)
-	prometheus.MustRegister(collector)
+	statsCollector := newAgentStatsCollector(consulClient)
+	checksAndServicesCollector := newAgentChecksAndServicesCollector(consulClient)
+	prometheus.MustRegister(statsCollector)
+	prometheus.MustRegister(checksAndServicesCollector)
+	// TODO: Replace with single collector which takes an "agent snapshot" and passes into subcollectors
 
 	http.Handle("/metrics", promhttp.Handler())
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
