@@ -25,7 +25,7 @@ func main() {
 	flag.Parse()
 
 	if *showVersion {
-		fmt.Printf(version.Print("consul_agent_exporter"))
+		fmt.Printf(version.Print("consul-agent_exporter"))
 		os.Exit(0)
 	}
 
