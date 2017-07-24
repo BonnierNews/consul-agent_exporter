@@ -165,7 +165,7 @@ type Stats struct {
 	Raft    RaftStats    `mapstructure:"raft,omitempty"`
 	Runtime RuntimeStats `mapstructure:"runtime"`
 	SerfLan SerfStats    `mapstructure:"serf_lan"`
-	SerfWan SerfStats    `mapstructure:"serf_wan"`
+	SerfWan SerfStats    `mapstructure:"serf_wan,omitempty"`
 }
 type AgentStats struct {
 	CheckMonitors uint64 `mapstructure:"check_monitors"`
@@ -305,7 +305,7 @@ func (c agentStatsCollector) Collect(ch chan<- prometheus.Metric) error {
 		log.Errorf("Could not create decoder: %v", err)
 		return err
 	}
-	err = decoder.Decode(info["stats"])
+	err = decoder.Decode(info["Stats"])
 	if err != nil {
 		log.Errorf("Could not decode stats from Consul: %v", err)
 		return err
