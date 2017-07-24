@@ -34,11 +34,11 @@ func newAgentChecksAndServicesCollector(client *api.Client) Collector {
 		ServiceChecks: prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, subsystem, "service_checks"),
 			"Number of service checks",
-			[]string{"service", "tags"}, nil),
+			[]string{"service_name", "service_id", "tags"}, nil),
 		ServiceChecksFailing: prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, subsystem, "service_checks_failing"),
 			"Number of failing service checks",
-			[]string{"service", "tags"}, nil),
+			[]string{"service_name", "service_id", "tags"}, nil),
 	}
 }
 
@@ -99,12 +99,12 @@ func (c agentChecksAndServicesCollector) Collect(ch chan<- prometheus.Metric) er
 
 	for serviceId, checkList := range serviceChecks {
 		service := serviceById[serviceId]
-		ch <- prometheus.MustNewConstMetric(c.ServiceChecks, prometheus.GaugeValue, float64(len(checkList)), service.Service, createTagsString(service.Tags))
+		ch <- prometheus.MustNewConstMetric(c.ServiceChecks, prometheus.GaugeValue, float64(len(checkList)), service.Service, service.ID, createTagsString(service.Tags))
 		failing := 0.0
 		for _, check := range checkList {
 			failing += 1.0 - isPassingFloat(check.Status)
 		}
-		ch <- prometheus.MustNewConstMetric(c.ServiceChecksFailing, prometheus.GaugeValue, failing, service.Service, createTagsString(service.Tags))
+		ch <- prometheus.MustNewConstMetric(c.ServiceChecksFailing, prometheus.GaugeValue, failing, service.Service, service.ID, createTagsString(service.Tags))
 	}
 
 	return nil
