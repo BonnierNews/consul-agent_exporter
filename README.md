@@ -5,7 +5,7 @@ Prometheus exporter for [Consul](https://consul.io) agents.
 ## Rationale
 This exporter gets data from a single Consul agent. It differs from the [prometheus/consul_exporter](https://github.com/prometheus/consul_exporter) which gets metrics from the cluster catalog.
 
-The agent metrics can both be more finely grained than cluster level metrics, as well as showing potential divergences between nodes.
+The agent metrics can both be more finely grained than cluster level metrics, as well as showing potential divergences between nodes. See [here](metrics.md) for a list of the metrics that are exported.
 
 ## Usage
 
