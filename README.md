@@ -1,5 +1,7 @@
 # Consul agent exporter
 
+[![CircleCI](https://circleci.com/gh/BonnierNews/consul-agent_exporter.svg?style=shield)](https://circleci.com/gh/BonnierNews/consul-agent_exporter)
+
 Prometheus exporter for [Consul](https://consul.io) agents. 
 
 ## Rationale
