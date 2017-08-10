@@ -12,7 +12,7 @@ dependencies:
   pre:
     - make promu
     - docker info
-    - git describe --always | sed -r 's/^v//' | tee VERSION
+    - echo -n "Version:"; git describe --always | sed -r 's/^v//' | tee VERSION
   override:
     - promu crossbuild
     - ln -s .build/linux-amd64/consul-agent_exporter consul-agent_exporter
