@@ -88,7 +88,8 @@ func (c agentChecksAndServicesCollector) Collect(ch chan<- prometheus.Metric) er
 		} else if _, ok := serviceChecks[check.ServiceID]; ok {
 			serviceChecks[check.ServiceID] = append(serviceChecks[check.ServiceID], check)
 		} else {
-			serviceChecks[check.ServiceID] = []*api.AgentCheck{check}
+			// During service registration, checks can be orphaned for a short while before they are cleaned up
+			log.Debugf("Found check %s registered on service %s, but that service does not exist!", check.CheckID, check.ServiceID)
 		}
 	}
 
