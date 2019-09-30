@@ -6,7 +6,7 @@ This collector exposes the status of services and checks registered on the agent
 
 Name | Description | Type | Labels
 -----|-------------|------|-------
-`consul_checks_node_checks` | Number of node checks | gauge | - |
+`consul_checks_node_checks` | Number of node checks | gauge | check |
 `consul_checks_service_checks` | Number of service checks | gauge | service_name,service_id,tags |
 `consul_checks_service_checks_failing` | Number of failing service checks | gauge | service_name,service_id,tags |
 `consul_checks_services` | Number of services | gauge | - |
